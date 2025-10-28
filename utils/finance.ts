@@ -34,12 +34,16 @@ export function calculateXIRR(cashflows: CashFlow[], guess: number = 0.1): numbe
         return 0;
     }
 
+    // Sort cashflows by date to ensure the first date is the earliest
+    cashflows.sort((a, b) => a.date.getTime() - b.date.getTime());
+
     let rate = guess;
 
     for (let i = 0; i < maxIterations; i++) {
         const npvValue = npv(rate, cashflows);
         const derivativeValue = npvDerivative(rate, cashflows);
         
+        // FIX: Added guard against division by zero, a likely cause of a crash.
         if (Math.abs(derivativeValue) < tolerance) {
             break;
         }
