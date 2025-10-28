@@ -2,13 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="icon" type="image/svg+xml" href="./logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MySelvam</title>
     <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="./manifest.json" />
     <meta name="theme-color" content="#14b8a6" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Add Babel for JSX Transpilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="importmap">
 {
   "imports": {
@@ -23,6 +25,7 @@
 </head>
   <body class="bg-slate-50 dark:bg-slate-900">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <!-- Tell Babel to transpile this script -->
+    <script type="text/babel" data-type="module" src="./index.tsx"></script>
   </body>
 </html>
