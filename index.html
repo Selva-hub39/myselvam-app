@@ -1,55 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MySelvam</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="logo.svg" type="image/svg+xml">
-    <meta name="theme-color" content="#14b8a6">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#14b8a6" />
     <script src="https://cdn.tailwindcss.com"></script>
+  <script type="importmap">
+{
+  "imports": {
+    "recharts": "https://aistudiocdn.com/recharts@^3.3.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0"
+  }
+}
+</script>
 </head>
-<body class="bg-slate-100">
+  <body class="bg-slate-50 dark:bg-slate-900">
     <div id="root"></div>
-
-    <!-- External Libraries -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/recharts@2.5.0/umd/Recharts.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- Global Namespace Initialization (CRITICAL FIX) -->
-    <script>
-      window.MySelvam = {
-        components: {},
-        data: {},
-        utils: {}
-      };
-    </script>
-
-    <!-- App Scripts (Order is important!) -->
-    <!-- 1. Data and Utils first -->
-    <script type="text/babel" data-presets="react" src="data/mockData.js"></script>
-    <script type="text/babel" data-presets="react" src="utils/finance.js"></script>
-    <script type="text/babel" data-presets="react" src="utils/casParser.js"></script>
-    <script type="text/babel" data-presets="react" src="utils/portfolioCalculations.js"></script>
-    
-    <!-- 2. Common Components -->
-    <script type="text/babel" data-presets="react" src="components/common/Card.js"></script>
-    <script type="text/babel" data-presets="react" src="components/common/Icons.js"></script>
-    
-    <!-- 3. View Components -->
-    <script type="text/babel" data-presets="react" src="components/Dashboard.js"></script>
-    <script type="text/babel" data-presets="react" src="components/Portfolio.js"></script>
-    <script type="text/babel" data-presets="react" src="components/Gold.js"></script>
-    <script type="text/babel" data-presets="react" src="components/Expenses.js"></script>
-    <script type="text/babel" data-presets="react" src="components/Assets.js"></script>
-    <script type="text/babel" data-presets="react" src="components/Goals.js"></script>
-
-    <!-- 4. Main App Component -->
-    <script type="text/babel" data-presets="react" src="App.js"></script>
-    
-    <!-- 5. Entry point to render the app -->
-    <script type="text/babel" data-presets="react" src="index.js"></script>
-</body>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>
