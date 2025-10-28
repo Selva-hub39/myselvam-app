@@ -1,11 +1,11 @@
-import React from 'react';
+(() => {
+  const Card = ({ children, className = '' }) => {
+    return (
+      React.createElement('div', {
+        className: `bg-white rounded-xl shadow-md p-6 ${className}`
+      }, children)
+    );
+  };
 
-const Card = ({ children, className = '' }) => {
-  return (
-    <div className={`bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md ${className}`}>
-      {children}
-    </div>
-  );
-};
-
-export default Card;
+  window.MySelvam.components.Card = Card;
+})();

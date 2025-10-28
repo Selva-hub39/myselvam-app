@@ -1,152 +1,170 @@
-import React, { useState, useMemo } from 'react';
-import Card from './common/Card.js';
-import { PlusIcon } from './common/Icons.js';
+(() => {
+  const { useState, useMemo } = React;
 
-const AssetForm = ({ onAdd, onClose }) => {
-    const [name, setName] = useState('');
-    const [type, setType] = useState('House');
-    const [purchaseValue, setPurchaseValue] = useState('');
-    const [currentValue, setCurrentValue] = useState('');
-    const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0]);
+  const Assets = ({ assets, setAssets }) => {
+    const { Card, PlusIcon, EditIcon, DeleteIcon } = window.MySelvam.components;
+    const { formatCurrency } = window.MySelvam.utils;
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const purchaseNum = parseFloat(purchaseValue);
-        const currentNum = parseFloat(currentValue);
-        if (name && !isNaN(purchaseNum) && !isNaN(currentNum) && purchaseDate) {
-            onAdd({
-                name,
-                type,
-                purchaseValue: purchaseNum,
-                currentValue: currentNum,
-                purchaseDate: purchaseDate
-            });
+    const [isModalOpen, setModalOpen] = useState(false);
+    const [editingAsset, setEditingAsset] = useState(null);
+
+    const summary = useMemo(() => {
+      if (assets.length === 0) {
+          return { totalValue: 0, overallCAGR: 0 };
+      }
+      const totalValue = assets.reduce((acc, item) => acc + item.currentValue, 0);
+      const totalPurchaseValue = assets.reduce((acc, item) => acc + item.purchaseValue, 0);
+      
+      const earliestPurchaseDate = assets.reduce((earliest, asset) => {
+        const assetDate = new Date(asset.purchaseDate);
+        return assetDate < earliest ? assetDate : earliest;
+      }, new Date());
+
+      const years = (new Date() - earliestPurchaseDate) / (1000 * 60 * 60 * 24 * 365.25);
+      if (years <= 0 || totalPurchaseValue <= 0) {
+        return { totalValue, overallCAGR: 0 };
+      }
+      const overallCAGR = ((Math.pow(totalValue / totalPurchaseValue, 1 / years) - 1) * 100);
+      
+      return { totalValue, overallCAGR };
+    }, [assets]);
+
+    const calculateCAGR = (asset) => {
+        const years = (new Date() - new Date(asset.purchaseDate)) / (1000 * 60 * 60 * 24 * 365.25);
+        if (years <= 0 || asset.purchaseValue <= 0) {
+            return 0;
         }
+        return ((Math.pow(asset.currentValue / asset.purchaseValue, 1 / years) - 1) * 100);
+    };
+
+    const handleSave = (asset) => {
+      if (editingAsset) {
+        setAssets(assets.map(a => a.id === editingAsset.id ? { ...a, ...asset } : a));
+      } else {
+        setAssets([...assets, { ...asset, id: `a${Date.now()}` }]);
+      }
+      setModalOpen(false);
+      setEditingAsset(null);
+    };
+
+    const handleEdit = (asset) => {
+      setEditingAsset(asset);
+      setModalOpen(true);
+    };
+
+    const handleDelete = (id) => {
+      setAssets(assets.filter(a => a.id !== id));
     };
     
+    const tableHeaders = ["Name", "Type", "Purchase Date", "Purchase Value", "Current Value", "CAGR (%)", "Actions"];
+
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <Card className="w-full max-w-md">
-                <h3 className="text-lg font-semibold mb-4">Add New Asset</h3>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input type="text" placeholder="Asset Name" value={name} onChange={e => setName(e.target.value)} className="w-full bg-slate-100 dark:bg-slate-700 p-2 rounded" required />
-                    <select value={type} onChange={e => setType(e.target.value)} className="w-full bg-slate-100 dark:bg-slate-700 p-2 rounded">
-                        <option>House</option>
-                        <option>Plot</option>
-                        <option>Vehicle</option>
-                        <option>Other</option>
-                    </select>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Purchase Date</label>
-                        <input type="date" value={purchaseDate} onChange={e => setPurchaseDate(e.target.value)} className="w-full bg-slate-100 dark:bg-slate-700 p-2 rounded" required />
-                    </div>
-                    <input type="number" placeholder="Purchase Value" value={purchaseValue} onChange={e => setPurchaseValue(e.target.value)} className="w-full bg-slate-100 dark:bg-slate-700 p-2 rounded" required />
-                    <input type="number" placeholder="Current Value" value={currentValue} onChange={e => setCurrentValue(e.target.value)} className="w-full bg-slate-100 dark:bg-slate-700 p-2 rounded" required />
-                    <div className="flex justify-end space-x-2">
-                        <button type="button" onClick={onClose} className="px-4 py-2 rounded-md bg-slate-200 dark:bg-slate-600">Cancel</button>
-                        <button type="submit" className="px-4 py-2 rounded-md text-white bg-teal-500">Add</button>
-                    </div>
-                </form>
-            </Card>
-        </div>
+      React.createElement('div', null,
+        React.createElement('div', { className: 'flex justify-between items-center mb-6' },
+          React.createElement('h1', { className: 'text-3xl font-bold text-slate-800' }, 'Other Assets'),
+          React.createElement('button', {
+            onClick: () => { setEditingAsset(null); setModalOpen(true); },
+            className: 'bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 flex items-center'
+          }, React.createElement(PlusIcon, {className: 'w-5 h-5 mr-2'}), 'Add Asset')
+        ),
+
+        React.createElement(Card, { className: 'mb-6' },
+          React.createElement('div', { className: 'grid grid-cols-2 gap-4 text-center' },
+            React.createElement('div', null,
+              React.createElement('h3', { className: 'text-md font-semibold text-slate-600' }, 'Total Asset Value'),
+              React.createElement('p', { className: 'text-2xl font-bold text-slate-900 mt-1' }, formatCurrency(summary.totalValue))
+            ),
+            React.createElement('div', null,
+              React.createElement('h3', { className: 'text-md font-semibold text-slate-600' }, 'Overall CAGR'),
+              React.createElement('p', { className: `text-2xl font-bold mt-1 ${summary.overallCAGR >= 0 ? 'text-green-600' : 'text-red-600'}` }, `${summary.overallCAGR.toFixed(2)} %`)
+            )
+          )
+        ),
+        
+        React.createElement(Card, null,
+          React.createElement('div', { className: 'overflow-x-auto' },
+            React.createElement('table', { className: 'w-full text-left' },
+              React.createElement('thead', null, React.createElement('tr', { className: 'border-b bg-slate-50' },
+                tableHeaders.map(h => React.createElement('th', { key: h, className: 'p-4 text-sm font-semibold text-slate-600' }, h))
+              )),
+              React.createElement('tbody', null,
+                assets.map(item => {
+                  const cagr = calculateCAGR(item);
+                  return React.createElement('tr', { key: item.id, className: 'border-b' },
+                    React.createElement('td', { className: 'p-4 font-semibold' }, item.name),
+                    React.createElement('td', { className: 'p-4' }, item.type),
+                    React.createElement('td', { className: 'p-4' }, item.purchaseDate),
+                    React.createElement('td', { className: 'p-4' }, formatCurrency(item.purchaseValue)),
+                    React.createElement('td', { className: 'p-4 font-bold' }, formatCurrency(item.currentValue)),
+                    React.createElement('td', { className: `p-4 font-semibold ${cagr >= 0 ? 'text-green-600' : 'text-red-600'}` }, `${cagr.toFixed(2)} %`),
+                    React.createElement('td', { className: 'p-4' },
+                      React.createElement('div', { className: 'flex gap-2' },
+                        React.createElement('button', { onClick: () => handleEdit(item), className: 'text-slate-500 hover:text-blue-600' }, React.createElement(EditIcon, { className: 'w-5 h-5' })),
+                        React.createElement('button', { onClick: () => handleDelete(item.id), className: 'text-slate-500 hover:text-red-600' }, React.createElement(DeleteIcon, { className: 'w-5 h-5' }))
+                      )
+                    )
+                  )
+                })
+              )
+            )
+          )
+        ),
+        isModalOpen && React.createElement(AssetModal, { onClose: () => { setModalOpen(false); setEditingAsset(null); }, onSave: handleSave, asset: editingAsset })
+      )
     );
-};
+  };
 
+  const AssetModal = ({ onClose, onSave, asset }) => {
+    const [formData, setFormData] = useState({
+      name: asset?.name || '',
+      type: asset?.type || 'Real Estate',
+      purchaseDate: asset?.purchaseDate || new Date().toISOString().split('T')[0],
+      purchaseValue: asset?.purchaseValue || '',
+      currentValue: asset?.currentValue || ''
+    });
 
-const Assets = ({ assets, setAssets }) => {
-    const [showForm, setShowForm] = useState(false);
-    const totalPurchaseValue = assets.reduce((sum, asset) => sum + asset.purchaseValue, 0);
-    const totalCurrentValue = assets.reduce((sum, asset) => sum + asset.currentValue, 0);
-    const appreciation = totalCurrentValue - totalPurchaseValue;
+    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    const overallCagr = useMemo(() => {
-        if (assets.length === 0 || totalPurchaseValue <= 0) return 0;
-
-        const earliestDate = assets.reduce((earliest, asset) => {
-            const assetDate = new Date(asset.purchaseDate);
-            return assetDate < earliest ? assetDate : earliest;
-        }, new Date(assets[0].purchaseDate));
-        
-        const years = (new Date().getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
-        
-        if (years <= 0) return 0;
-        
-        const cagr = (Math.pow(totalCurrentValue / totalPurchaseValue, 1 / years) - 1) * 100;
-        return isNaN(cagr) || !isFinite(cagr) ? 0 : cagr;
-    }, [assets, totalCurrentValue, totalPurchaseValue]);
-
-    const handleAddAsset = (asset) => {
-        setAssets(prev => [asset, ...prev]);
-        setShowForm(false);
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      onSave({
+        ...formData,
+        purchaseValue: parseFloat(formData.purchaseValue),
+        currentValue: parseFloat(formData.currentValue)
+      });
     };
+    
+    const assetTypes = ['Real Estate', 'Retirement Fund', 'Stock', 'Other'];
 
-    return (
-        <div className="space-y-6">
-            {showForm && <AssetForm onAdd={handleAddAsset} onClose={() => setShowForm(false)} />}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h2 className="text-3xl font-bold text-slate-800 dark:text-white">Asset Management</h2>
-                 <button onClick={() => setShowForm(true)} className="flex items-center px-4 py-2 rounded-lg text-white bg-teal-500 hover:bg-teal-600">
-                    <PlusIcon className="mr-2" /> Add Asset
-                </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Total Current Value</p>
-                    <p className="text-2xl font-bold">₹{totalCurrentValue.toLocaleString('en-IN')}</p>
-                </Card>
-                <Card>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Total Appreciation</p>
-                    <p className={`text-2xl font-bold ${appreciation >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                        ₹{appreciation.toLocaleString('en-IN')}
-                    </p>
-                </Card>
-                <Card>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Overall CAGR</p>
-                     <p className={`text-2xl font-bold ${overallCagr >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                        {overallCagr.toFixed(2)}%
-                    </p>
-                </Card>
-            </div>
-
-            <Card>
-                <h3 className="text-lg font-semibold mb-4">Your Assets</h3>
-                <div className="space-y-4">
-                    {assets.length > 0 ? assets.map((asset, index) => {
-                        const purchaseDate = new Date(asset.purchaseDate);
-                        const years = (new Date().getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
-                        let cagr = 0;
-                        if (years > 0 && asset.purchaseValue > 0) {
-                            cagr = (Math.pow(asset.currentValue / asset.purchaseValue, 1 / years) - 1) * 100;
-                        }
-                        if (isNaN(cagr) || !isFinite(cagr)) cagr = 0;
-                        
-                        return (
-                         <div key={index} className="grid grid-cols-2 md:grid-cols-5 gap-4 p-3 bg-slate-100 dark:bg-slate-700 rounded-lg items-center">
-                            <div className="md:col-span-2">
-                                <p className="font-bold">{asset.name}</p>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">{asset.type} &middot; {purchaseDate.toLocaleDateString('en-GB')}</p>
-                            </div>
-                            <div className="text-right md:text-left">
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Purchase Value</p>
-                                <p>₹{asset.purchaseValue.toLocaleString('en-IN')}</p>
-                            </div>
-                             <div className="text-left">
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Current Value</p>
-                                <p className="font-semibold">₹{asset.currentValue.toLocaleString('en-IN')}</p>
-                            </div>
-                             <div className="text-right">
-                                <p className="text-sm text-slate-500 dark:text-slate-400">CAGR</p>
-                                <p className={`font-semibold ${cagr >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                    {cagr.toFixed(2)}%
-                                </p>
-                            </div>
-                        </div>
-                    )) : <div className="text-center py-8 text-slate-500">No assets added yet.</div>}
-                </div>
-            </Card>
-        </div>
+    return React.createElement('div', { className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50' },
+      React.createElement('div', { className: 'bg-white rounded-lg shadow-xl p-6 w-full max-w-md' },
+        React.createElement('h2', { className: 'text-xl font-bold text-slate-800 mb-4' }, asset ? 'Edit Asset' : 'Add Asset'),
+        React.createElement('form', { onSubmit: handleSubmit },
+          React.createElement(InputField, { label: "Name", name: "name", value: formData.name, onChange: handleChange, required: true }),
+          React.createElement('div', { className: 'mb-4' },
+            React.createElement('label', { className: 'block text-sm font-medium text-slate-700 mb-1' }, 'Asset Type'),
+            React.createElement('select', { name: 'type', value: formData.type, onChange: handleChange, className: 'w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500' },
+              assetTypes.map(cat => React.createElement('option', { key: cat, value: cat }, cat))
+            )
+          ),
+          React.createElement(InputField, { label: "Purchase Date", name: "purchaseDate", type: "date", value: formData.purchaseDate, onChange: handleChange, required: true }),
+          React.createElement(InputField, { label: "Purchase Value (₹)", name: "purchaseValue", type: "number", value: formData.purchaseValue, onChange: handleChange, required: true }),
+          React.createElement(InputField, { label: "Current Value (₹)", name: "currentValue", type: "number", value: formData.currentValue, onChange: handleChange, required: true }),
+          React.createElement('div', { className: 'flex justify-end gap-2 mt-6' },
+            React.createElement('button', { type: 'button', onClick: onClose, className: 'bg-slate-200 text-slate-800 px-4 py-2 rounded-md hover:bg-slate-300' }, 'Cancel'),
+            React.createElement('button', { type: 'submit', className: 'bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700' }, 'Save')
+          )
+        )
+      )
     );
-};
+  };
+  
+  const InputField = ({ label, ...props }) => (
+    React.createElement('div', { className: 'mb-4' },
+      React.createElement('label', { className: 'block text-sm font-medium text-slate-700 mb-1' }, label),
+      React.createElement('input', { ...props, className: 'w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500' })
+    )
+  );
 
-export default Assets;
+  window.MySelvam.components.Assets = Assets;
+})();

@@ -1,83 +1,44 @@
-export const mockMutualFunds = [
-  { 
-    id: 'mf1',
-    name: 'Parag Parikh Flexi Cap Fund', 
-    owner: 'Self',
-    currentValue: 750000,
-    sipAmount: 10000,
-    sipStartDate: '2023-01-05',
-    transactions: [
-        { date: '2023-01-05', description: 'SIP Installment', amount: 10000, units: 150.15, price: 66.6, type: 'SIP' },
-        { date: '2023-02-05', description: 'SIP Installment', amount: 10000, units: 145.5, price: 68.7, type: 'SIP' },
-        { date: '2023-03-05', description: 'Lumpsum Purchase', amount: 50000, units: 720.5, price: 69.4, type: 'Purchase' },
-    ]
-  },
-  { 
-    id: 'mf2',
-    name: 'Quant Small Cap Fund', 
-    owner: 'Self',
-    currentValue: 480000,
-    transactions: [
-       { date: '2022-11-10', description: 'Initial Purchase', amount: 200000, units: 1000, price: 200, type: 'Purchase' }
-    ]
-  },
-  { 
-    id: 'mf3',
-    name: 'Mirae Asset Large Cap Fund', 
-    owner: 'Spouse',
-    currentValue: 520000,
-     transactions: [
-       { date: '2021-06-15', description: 'Initial Purchase', amount: 300000, units: 2500, price: 120, type: 'Purchase' }
-    ]
-  },
-];
-
-export const mockGoldHoldings = [
-  { id: 'g1', purchaseDate: '2022-10-15', grams: 10, totalCost: 50000 },
-  { id: 'g2', purchaseDate: '2023-04-20', grams: 20, totalCost: 110000 },
-];
-
-export const mockAssets = [
-  { name: 'Primary Residence', type: 'House', purchaseValue: 7500000, currentValue: 9000000, purchaseDate: '2020-05-10' },
-  { name: 'Investment Plot', type: 'Plot', purchaseValue: 2000000, currentValue: 2500000, purchaseDate: '2021-02-15' },
-  { name: 'Honda City', type: 'Vehicle', purchaseValue: 1200000, currentValue: 800000, purchaseDate: '2019-07-22' },
-];
-
-export const mockExpenses = [
-    { id: '1', date: new Date().toISOString().split('T')[0], amount: 1200, category: 'Food', notes: 'Team lunch', paymentMethod: 'UPI'},
-    { id: '2', date: new Date().toISOString().split('T')[0], amount: 3500, category: 'Shopping', notes: 'New shoes', paymentMethod: 'Card'},
-];
-
-export const mockBudgets = [
-  { category: 'Food', amount: 20000 },
-  { category: 'Shopping', amount: 15000 },
-  { category: 'Utilities', amount: 8000 },
-  { category: 'Transport', amount: 5000 },
-  { category: 'Entertainment', amount: 7000 },
-  { category: 'Other', amount: 10000 },
-];
-
-export const mockGoals = [
-    {
-        id: '1',
-        name: 'Children College',
-        targetYear: 2042,
-        targetAmountToday: 8000000,
-        inflationRate: 6,
-        linkedInvestments: [
-            { schemeName: 'Jio Blackrock Flexi Cap', sipAmount: 135000, lumpsumInvestment: 0 },
-            { schemeName: 'Zerodha Nifty LargeMidcap 250', sipAmount: 180000, lumpsumInvestment: 50000 },
-            { schemeName: 'HDFC Balanced Advantage', sipAmount: 135000, lumpsumInvestment: 0 },
-        ],
-    },
-    {
-        id: '2',
-        name: 'Retirement Home',
-        targetYear: 2034,
-        targetAmountToday: 12500000,
-        inflationRate: 8,
-        linkedInvestments: [
-            { schemeName: 'Nippon India Large Cap', sipAmount: 30000, lumpsumInvestment: 200000 },
+(() => {
+  window.MySelvam.data = {
+    mockMutualFunds: [
+      {
+        id: 'mf1',
+        name: 'Parag Parikh Flexi Cap Fund',
+        owner: 'Self',
+        currentValue: 120000,
+        sipAmount: 5000,
+        sipStartDate: '2022-01-05',
+        transactions: [
+          { date: '2022-01-05', description: 'SIP Installment', amount: 5000, units: 100, nav: 50, type: 'purchase' },
+          { date: '2022-02-05', description: 'SIP Installment', amount: 5000, units: 95, nav: 52.63, type: 'purchase' },
         ]
-    }
-];
+      },
+      {
+        id: 'mf2',
+        name: 'Axis Small Cap Fund',
+        owner: 'Spouse',
+        currentValue: 75000,
+        transactions: [
+          { date: '2021-11-20', description: 'Lumpsum', amount: 50000, units: 800, nav: 62.5, type: 'purchase' },
+        ]
+      }
+    ],
+    mockGoldHoldings: [
+      { id: 'g1', name: 'Sovereign Gold Bond 2023-24', purchaseDate: '2023-09-20', weightGr: 10, purchaseValue: 59230, currentValue: 68500 },
+      { id: 'g2', name: 'Digital Gold (Augmont)', purchaseDate: '2022-10-26', weightGr: 5, purchaseValue: 25500, currentValue: 34250 },
+    ],
+    mockAssets: [
+      { id: 'a1', name: 'Primary Residence', type: 'Real Estate', purchaseDate: '2020-05-15', purchaseValue: 7500000, currentValue: 9000000 },
+      { id: 'a2', name: 'EPF', type: 'Retirement Fund', purchaseDate: '2015-06-01', purchaseValue: 800000, currentValue: 1500000 },
+    ],
+    mockExpenses: [
+      { id: 'e1', date: '2024-05-01', category: 'Household', amount: 15000, description: 'Monthly Groceries' },
+      { id: 'e2', date: '2024-05-05', category: 'Utilities', amount: 3500, description: 'Electricity Bill' },
+      { id: 'e3', date: '2024-05-10', category: 'Transport', amount: 2000, description: 'Fuel' },
+    ],
+    mockGoals: [
+      { id: 'goal1', name: "Child's Education Fund", targetAmount: 2000000, targetDate: '2035-06-01', savedAmount: 350000 },
+      { id: 'goal2', name: 'Retirement Corpus', targetAmount: 10000000, targetDate: '2045-12-31', savedAmount: 1500000 },
+    ],
+  };
+})();

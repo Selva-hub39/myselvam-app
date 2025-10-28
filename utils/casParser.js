@@ -1,51 +1,32 @@
-/**
- * Parses a CAMS/KFintech Consolidated Account Statement (CAS) PDF.
- * NOTE: This is a MOCK implementation. A real-world implementation would
- * require a sophisticated PDF parsing library (like pdf.js) and complex logic
- * to extract text and identify transaction patterns from the statement.
- * This function simulates that process for demonstration purposes.
- * 
- * @param {File} file The PDF file object.
- * @param {string} password The password for the PDF (usually the user's PAN).
- * @returns {Promise<Array<Object>>} A promise that resolves to an array of parsed MutualFund objects.
- */
-export const parseCamsStatement = (file, password) => {
-    return new Promise((resolve, reject) => {
-        console.log(`Simulating parsing for file: ${file.name} with password: ${password}`);
+(() => {
+    const utils = window.MySelvam.utils;
 
-        // Simulate a delay for processing
-        setTimeout(() => {
-            if (password.toLowerCase() !== 'demopan') {
-                return reject(new Error('Invalid password. For this demo, please use "demopan".'));
+    // This is a placeholder function. In a real application, this would involve a library
+    // like PDF.js to read and parse the PDF content. This is a very complex task.
+    utils.parseCamsStatement = async (file, password) => {
+        console.log("Parsing statement with password:", password);
+        // Simulate parsing delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // In a real implementation:
+        // 1. Use PDF.js to load the password-protected PDF.
+        // 2. Extract text content from each page.
+        // 3. Use complex regular expressions to find folio numbers, fund names, and transaction tables.
+        // 4. Parse the transaction rows to extract date, description, amount, units, NAV, etc.
+        // 5. Aggregate transactions by fund and return a structured object.
+
+        // For now, we return mock parsed data to simulate a successful import.
+        return [
+            {
+                id: `mf${Date.now()}`,
+                name: "Quant Small Cap Fund (from PDF)",
+                owner: "Self",
+                currentValue: 15000,
+                transactions: [
+                    { date: '2023-10-10', description: 'Purchase', amount: 10000, units: 50, nav: 200, type: 'purchase' },
+                    { date: '2023-11-10', description: 'SIP Installment', amount: 5000, units: 24, nav: 208.33, type: 'purchase' },
+                ]
             }
-
-            // Simulate extracting data from the PDF
-            const parsedFunds = [
-                {
-                    id: `cas-${Date.now()}-1`,
-                    name: 'ICICI Prudential Technology Fund',
-                    owner: 'Self',
-                    currentValue: 150000, // This would not be in the CAS, user updates this
-                    transactions: [
-                        { date: '2023-05-10', description: 'SIP Installment', amount: 5000, units: 45.87, price: 109.0, type: 'SIP' },
-                        { date: '2023-06-10', description: 'SIP Installment', amount: 5000, units: 44.25, price: 113.0, type: 'SIP' },
-                    ]
-                },
-                {
-                    id: `cas-${Date.now()}-2`,
-                    name: 'Parag Parikh Flexi Cap Fund',
-                    owner: 'Self',
-                    currentValue: 780000,
-                    transactions: [
-                         { date: '2023-04-05', description: 'SIP Installment', amount: 10000, units: 140.5, price: 71.1, type: 'SIP' },
-                         { date: '2023-05-05', description: 'SIP Installment', amount: 10000, units: 138.5, price: 72.2, type: 'SIP' },
-                         { date: '2023-06-05', description: 'SIP Installment', amount: 10000, units: 135.1, price: 74.0, type: 'SIP' },
-                    ]
-                }
-            ];
-            
-            resolve(parsedFunds);
-
-        }, 2000); // 2-second delay to simulate parsing
-    });
-};
+        ];
+    };
+})();

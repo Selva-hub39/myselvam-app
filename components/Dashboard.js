@@ -1,116 +1,124 @@
-import React from 'react';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import Card from './common/Card.js';
-import { NetWorthIcon, AssetsIcon, GrowthIcon } from './common/Icons.js';
+(() => {
+  const { useMemo } = React;
+  
+  const Dashboard = ({ funds, goldHoldings, assets, expenses, goals }) => {
+    const { Card } = window.MySelvam.components;
+    const { formatCurrency } = window.MySelvam.utils;
+    const { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } = window.Recharts;
 
-const Dashboard = ({ mutualFunds, goldHoldings, assets }) => {
-    const totalMutualFunds = mutualFunds.reduce((sum, fund) => sum + fund.currentValue, 0);
-    // Assuming a static live price for now, as it's managed in the Gold component
-    const totalGoldValue = goldHoldings.reduce((sum, gold) => sum + (gold.grams * 7250), 0); 
-    const totalRealEstate = assets.filter(a => a.type === 'House' || a.type === 'Plot').reduce((sum, asset) => sum + asset.currentValue, 0);
-    const totalOtherAssets = assets.filter(a => a.type !== 'House' && a.type !== 'Plot').reduce((sum, asset) => sum + asset.currentValue, 0);
+    const portfolioSummary = useMemo(() => {
+      const totalCurrentValue = funds.reduce((acc, fund) => acc + fund.currentValue, 0);
+      const totalInvested = funds.reduce((acc, fund) => acc + fund.transactions.reduce((sum, tx) => sum + tx.amount, 0), 0);
+      const totalGain = totalCurrentValue - totalInvested;
+      const growthPercentage = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
+      return { totalCurrentValue, totalGain, growthPercentage };
+    }, [funds]);
 
-    const totalAssets = totalMutualFunds + totalGoldValue + totalRealEstate + totalOtherAssets;
-    const netWorth = totalAssets; // Assuming no liabilities for simplicity
+    const totalNetWorth = useMemo(() => {
+      const mutualFundsTotal = funds.reduce((sum, fund) => sum + fund.currentValue, 0);
+      const goldTotal = goldHoldings.reduce((sum, item) => sum + item.currentValue, 0);
+      const otherAssetsTotal = assets.reduce((sum, item) => sum + item.currentValue, 0);
+      return mutualFundsTotal + goldTotal + otherAssetsTotal;
+    }, [funds, goldHoldings, assets]);
+    
+    const assetDistributionData = useMemo(() => {
+      const mutualFundsTotal = funds.reduce((sum, fund) => sum + fund.currentValue, 0);
+      const goldTotal = goldHoldings.reduce((sum, item) => sum + item.currentValue, 0);
+      const otherAssetsTotal = assets.reduce((sum, item) => sum + item.currentValue, 0);
+      const total = mutualFundsTotal + goldTotal + otherAssetsTotal;
 
-    const assetDistributionData = [
-        { name: 'Equity/MF', value: totalMutualFunds },
-        { name: 'Gold', value: totalGoldValue },
-        { name: 'Real Estate', value: totalRealEstate },
-        { name: 'Others', value: totalOtherAssets },
-    ].filter(item => item.value > 0);
+      if (total === 0) return [];
+      
+      return [
+        { name: 'Mutual Funds', value: mutualFundsTotal },
+        { name: 'Gold', value: goldTotal },
+        { name: 'Other Assets', value: otherAssetsTotal },
+      ].filter(item => item.value > 0);
+    }, [funds, goldHoldings, assets]);
 
-    const COLORS = ['#0d9488', '#facc15', '#0ea5e9', '#64748b'];
-
+    const COLORS = ['#14b8a6', '#f59e0b', '#3b82f6'];
+    
     return (
-        <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-slate-800 dark:text-white">Dashboard</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card>
-                    <div className="flex items-center">
-                        <div className="p-3 bg-teal-100 dark:bg-teal-900 rounded-full mr-4">
-                            <NetWorthIcon className="text-teal-500" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">Net Worth</p>
-                            <p className="text-2xl font-bold">₹{netWorth.toLocaleString('en-IN')}</p>
-                        </div>
-                    </div>
-                </Card>
-                <Card>
-                    <div className="flex items-center">
-                        <div className="p-3 bg-sky-100 dark:bg-sky-900 rounded-full mr-4">
-                            <AssetsIcon className="text-sky-500" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">Total Assets</p>
-                            <p className="text-2xl font-bold">₹{totalAssets.toLocaleString('en-IN')}</p>
-                        </div>
-                    </div>
-                </Card>
-                <Card>
-                    <div className="flex items-center">
-                         <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full mr-4">
-                            <GrowthIcon className="text-green-500" />
-                        </div>
-                        <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">Overall Growth</p>
-                            <p className="text-2xl font-bold text-green-500">+12.5%</p>
-                        </div>
-                    </div>
-                </Card>
-            </div>
+      React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' },
+        React.createElement('div', { className: 'col-span-1 md:col-span-2 xl:col-span-3' },
+            React.createElement('h1', { className: 'text-3xl font-bold text-slate-800' }, 'Dashboard')
+        ),
+        
+        React.createElement(Card, { className: 'col-span-1' },
+            React.createElement('h2', { className: 'text-lg font-semibold text-slate-700 mb-1' }, 'Total Net Worth'),
+            React.createElement('p', { className: 'text-4xl font-bold text-slate-900' }, formatCurrency(totalNetWorth))
+        ),
+        
+        React.createElement(Card, { className: 'col-span-1' },
+            React.createElement('h2', { className: 'text-lg font-semibold text-slate-700 mb-1' }, 'Portfolio Value'),
+            React.createElement('p', { className: 'text-4xl font-bold text-slate-900' }, formatCurrency(portfolioSummary.totalCurrentValue)),
+            React.createElement('p', { className: `text-md font-semibold mt-2 ${portfolioSummary.totalGain >= 0 ? 'text-green-600' : 'text-red-600'}` },
+                `${formatCurrency(portfolioSummary.totalGain)} (${portfolioSummary.growthPercentage.toFixed(2)}%)`
+            )
+        ),
+        
+        React.createElement(Card, { className: 'col-span-1' },
+          React.createElement('h2', { className: 'text-lg font-semibold text-slate-700 mb-1' }, 'Upcoming Goals'),
+          goals.length > 0 ? 
+            React.createElement('ul', {className: 'space-y-2 mt-2'},
+                goals.slice(0, 2).map(goal => React.createElement('li', {key: goal.id}, 
+                    React.createElement('p', {className: 'font-semibold'}, goal.name),
+                    React.createElement('p', {className: 'text-sm text-slate-600'}, `${formatCurrency(goal.savedAmount)} / ${formatCurrency(goal.targetAmount)}`)
+                ))
+            ) : React.createElement('p', null, 'No goals set.')
+        ),
 
-            <Card>
-                <h3 className="text-lg font-semibold mb-4">Asset Distribution</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                    <div style={{ width: '100%', height: 250 }}>
-                        {assetDistributionData.length > 0 ? (
-                            <ResponsiveContainer>
-                                <PieChart>
-                                    <Pie
-                                        data={assetDistributionData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={100}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                        nameKey="name"
-                                    >
-                                        {assetDistributionData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip formatter={(value) => `₹${value.toLocaleString('en-IN')}`} />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className="flex items-center justify-center h-full text-slate-500">No assets added yet.</div>
-                        )}
-                    </div>
-                     <div className="space-y-4">
-                        {assetDistributionData.map((entry, index) => {
-                            const percentage = totalAssets > 0 ? (entry.value / totalAssets) * 100 : 0;
-                            return (
-                                <div key={entry.name} className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <div className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                                        <span className="font-medium">{entry.name}</span>
-                                    </div>
-                                    <div className="text-right">
-                                       <p className="font-semibold">₹{entry.value.toLocaleString('en-IN')}</p>
-                                       <p className="text-sm text-slate-500 dark:text-slate-400">{percentage.toFixed(2)}%</p>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </Card>
-        </div>
+        React.createElement(Card, { className: 'col-span-1 md:col-span-2' },
+          React.createElement('h2', { className: 'text-lg font-semibold text-slate-700 mb-2' }, 'Asset Distribution'),
+           assetDistributionData.length > 0 ?
+            React.createElement('div', { className: 'flex flex-col md:flex-row items-center h-64' },
+              React.createElement('div', { className: 'w-full md:w-1/2 h-full' },
+                React.createElement(ResponsiveContainer, null,
+                  React.createElement(PieChart, null,
+                    React.createElement(Pie, {
+                      data: assetDistributionData,
+                      cx: "50%",
+                      cy: "50%",
+                      innerRadius: 60,
+                      outerRadius: 80,
+                      fill: "#8884d8",
+                      paddingAngle: 5,
+                      dataKey: "value"
+                    },
+                      assetDistributionData.map((entry, index) => React.createElement(Cell, { key: `cell-${index}`, fill: COLORS[index % COLORS.length] }))
+                    ),
+                    React.createElement(Tooltip, { formatter: (value) => formatCurrency(value) })
+                  )
+                )
+              ),
+              React.createElement('div', { className: 'w-full md:w-1/2 mt-4 md:mt-0 md:pl-6' },
+                React.createElement('ul', null,
+                  assetDistributionData.map((entry, index) => (
+                    React.createElement('li', { key: `legend-${index}`, className: 'flex items-center mb-2' },
+                      React.createElement('span', { className: 'w-3 h-3 rounded-full mr-2', style: { backgroundColor: COLORS[index % COLORS.length] } }),
+                      React.createElement('span', { className: 'text-slate-700 mr-2' }, `${entry.name}:`),
+                      React.createElement('span', { className: 'font-semibold' }, `${formatCurrency(entry.value)} (${((entry.value / totalNetWorth) * 100).toFixed(1)}%)`)
+                    )
+                  ))
+                )
+              )
+            )
+            : React.createElement('p', {className: 'flex items-center justify-center h-full text-slate-500'}, 'No asset data to display.')
+        ),
+        
+        React.createElement(Card, { className: 'col-span-1' },
+          React.createElement('h2', { className: 'text-lg font-semibold text-slate-700 mb-2' }, 'Recent Expenses'),
+            expenses.length > 0 ?
+            React.createElement('ul', {className: 'space-y-2'},
+                expenses.slice(0, 4).map(expense => React.createElement('li', {key: expense.id, className: 'flex justify-between'}, 
+                    React.createElement('span', null, expense.description),
+                    React.createElement('span', {className: 'font-semibold'}, formatCurrency(expense.amount))
+                ))
+            ) : React.createElement('p', null, 'No expenses recorded.')
+        )
+      )
     );
-};
-
-export default Dashboard;
+  };
+  
+  window.MySelvam.components.Dashboard = Dashboard;
+})();
